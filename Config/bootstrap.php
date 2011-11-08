@@ -8,8 +8,11 @@
 if (defined('SledgeHammer\INITIALIZED')) {
 	return;
 }
+require_once (ROOT.'/sledgehammer/core/render_public_folders.php');
+
 define('SledgeHammer\TMP_DIR', TMP.'sledgehammer/');
 require_once (ROOT.'/sledgehammer/core/init_framework.php');
+
 //* 
 // Don't show notices when a class is unknown to the AutoLoader (allow Cake to load the class)
 $GLOBALS['AutoLoader']->standalone = false;
