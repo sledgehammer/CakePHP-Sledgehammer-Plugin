@@ -3,7 +3,9 @@
 Intergrates the SledgeHammer Framework into an CakePHP 2.x project
 
 ## Installation ##
-1. Copy this plugin into the "app/Plugin/SledgeHammer folder"
+1. Place this plugin into the "app/Plugin/SledgeHammer/" folder
+``` git submodule add https://bfanger@github.com/bfanger/cakeplugin_sledgehammer.git app/Plugin/SledgeHammer ```
+
 
 2. Place the "sledgehammer" folder at the same level as the "app" folder:  
 ``` git submodule add https://github.com/bfanger/sledgehammer_core.git sledgehammer/core ```
@@ -32,4 +34,12 @@ define('ENVIRONMENT', 'development');
 $_SERVER['SERVER_ADMIN'] = 'your@email.com';
 CakePlugin::load('SledgeHammer', array('bootstrap' => true));
 ```
+4. Add the statusbar element just before the "</body>"
 
+```php
+<?php echo $this->element('statusbar', array(), array('plugin' => 'SledgeHammer')); ?>
+```
+
+5. Upgrade your database config.
+
+Change the datasource from 'Database/Mysql' into 'SledgeHammer.Database/SledgeHammerMysql'
