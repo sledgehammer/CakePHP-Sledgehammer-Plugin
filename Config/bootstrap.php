@@ -9,11 +9,21 @@ if (defined('SledgeHammer\INITIALIZED')) {
 	return;
 }
 define('SledgeHammer\MICROTIME_START', TIME_START);
-require_once (ROOT.'/sledgehammer/core/render_public_folders.php');
+if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'test.php') { // A webrequest?
+	require_once (ROOT.'/sledgehammer/core/render_public_folders.php');
+}
+if (DIRECTORY_SEPARATOR === '/') {
+	$posix_user = posix_getpwuid(posix_geteuid());
+	define('SledgeHammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
+} else {
+	define('SledgeHammer\TMP_DIR', TMP.'sledgehammer/');
 
-define('SledgeHammer\TMP_DIR', TMP.'sledgehammer/');
+}
 require_once (ROOT.'/sledgehammer/core/init_framework.php');
 
+if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
+	$GLOBALS['AutoLoader']->standalone = false; // PHPUnit also uses an autoloadeder
+}
 /*
 // Don't show notices when a class is unknown to the AutoLoader (allow Cake to load the class)
 $GLOBALS['AutoLoader']->standalone = false;
@@ -37,10 +47,12 @@ foreach ($applicationOverrides as $applicationOverride) {
 }
 $GLOBALS['AutoLoader']->importFolder(CAKE, array(
 	'mandatory_superclass' => false,
-	'ignore_folders' => array(CAKE.'Console', CAKE.'Test'),
+	'ignore_folders' => array(CAKE.'Console', CAKE.'Test', CAKE.'TestSuite', CAKE.'Config'),
 	'ignore_files' => $ignoreFiles,
+	// CakePHP doesnt follow it's own standards...
+	'matching_filename' => false,
+	'one_definition_per_file' => false
 ));
-$GLOBALS['AutoLoader']->enableCache = false;
 $GLOBALS['AutoLoader']->importFolder(APP, array(
 	'mandatory_definition' => false,
 	'ignore_folders' => array(
