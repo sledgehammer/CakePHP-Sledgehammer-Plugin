@@ -7,12 +7,12 @@ Intergrates the SledgeHammer Framework into an CakePHP 2.x project
 ### 1. Add the plugin  ###
 
 Place this plugin into the "app/Plugin/SledgeHammer/" folder.
-``` git submodule add https://bfanger@github.com/bfanger/cakeplugin_sledgehammer.git app/Plugin/SledgeHammer ```
+``` git submodule add git://github.com/bfanger/cakeplugin_sledgehammer.git app/Plugin/SledgeHammer ```
 
 
 ### 2. Add SledgeHammer  ###
 Place the "sledgehammer" folder at the same level as the "app" folder:
-``` git submodule add https://github.com/bfanger/sledgehammer_core.git sledgehammer/core ```
+``` git submodule add git://github.com/bfanger/sledgehammer_core.git sledgehammer/core ```
 
 Your project folder should look like this
 
