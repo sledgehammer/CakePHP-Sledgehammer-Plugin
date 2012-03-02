@@ -35,7 +35,7 @@ class SledgeHammerMysql extends Mysql {
 	
 	function __set($property, $value) {
 		if ($property == 'configKeyName') {
-			$GLOBALS['Databases'][$value] = $this->_connection;
+			 \SledgeHammer\Database::$instances[$value] = $this->_connection;
 		}
 		$this->$property = $value;
 	}

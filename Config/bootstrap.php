@@ -1,4 +1,5 @@
 <?php
+use SledgeHammer\Framework;
 /**
  * Initialize the SledgeHammer framework
  * and configure Cake to use SledgeHammer\ErrorHandler
@@ -25,11 +26,11 @@ if (function_exists('posix_getpwuid')) {
 }
 require_once(ROOT.'/sledgehammer/core/init_framework.php');
 if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
-	$GLOBALS['AutoLoader']->standalone = false; // PHPUnit also uses an autoloadeder
+	Framework::$autoLoader->standalone = false; // PHPUnit also uses an autoloadeder
 }
 //*
 // Don't show notices when a class is unknown to the AutoLoader (allow Cake to load the class)
-$GLOBALS['AutoLoader']->standalone = false;
+Framework::$autoLoader->standalone = false;
 /*/
 // Register CakePHP and Application classes to SledgeHammer's AutoLoader
 $ignoreFiles = array(
@@ -48,7 +49,7 @@ foreach ($applicationOverrides as $applicationOverride) {
 		$ignoreFiles[] = CAKE.$applicationOverride;
 	}
 }
-$GLOBALS['AutoLoader']->importFolder(CAKE, array(
+Framework::$autoLoader->importFolder(CAKE, array(
 	'mandatory_superclass' => false,
 	'ignore_folders' => array(CAKE.'Console', CAKE.'Test', CAKE.'TestSuite', CAKE.'Config'),
 	'ignore_files' => $ignoreFiles,
@@ -56,7 +57,7 @@ $GLOBALS['AutoLoader']->importFolder(CAKE, array(
 	'matching_filename' => false,
 	'one_definition_per_file' => false
 ));
-$GLOBALS['AutoLoader']->importFolder(APP, array(
+Framework::$autoLoader->importFolder(APP, array(
 	'mandatory_definition' => false,
 	'ignore_folders' => array(
 		APP.'tmp',
@@ -79,7 +80,7 @@ Configure::write('Error', array());
  */
 function handle_exception_callback($exception) {
 	SledgeHammer\ErrorHandler::handle_exception($exception); // mail/backtrace etc
-	ErrorHandler::handleException($exception); // Show 404/500 error page
+	ErrorHandler::handleException($exception); // Show 404/500 error page (with the CakePHP ErrorHandler)
 }
 
 Configure::write('Exception', array(
