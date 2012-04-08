@@ -77,6 +77,13 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 		ob_flush();
 	}
 
+	function test_offset_exist_in_instance() {
+		$repo = SledgeHammer\getRepository();
+		$wrapped = new CakeModelWrapper($repo->getOrder(1), array('model' => 'Order'));
+		$this->assertTrue($wrapped->offsetExists('Customer'));
+		$this->assertFalse($wrapped->offsetExists('BlaBla'));
+	}
+
 	/**
 	 * Compare the output from an Model->find('first') with the output from CakeModelWrapper->toArray()
 	 *

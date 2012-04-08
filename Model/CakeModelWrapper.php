@@ -5,7 +5,7 @@ use SledgeHammer\HasManyPlaceholder;
 /**
  * CakeModelWrapper present a model instance as an array.
  */
-class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
+class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Iterator {
 
 	/**
 	 * @var stdClass
@@ -104,6 +104,8 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 		return $data;
 	}
 
+	// ArrayAccess interface
+
 	function offsetGet($offset) {
 		if ($this->_instance) {
 			if ($offset === $this->_options['model']) {
@@ -120,14 +122,32 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 				}
 			}
 		} elseif (is_int($offset)) {
-			dump($this->_iterator->offsetGet($offset));
+			return new CakeModelWrapper($this->_iterator->offsetGet($offset), $this->_options);
 		}
 		notice('Offset ['.$offset.'] not found');
-
 	}
 
 	function offsetExists($offset) {
-		throw new Exception('Not implemented');
+		if ($this->_instance) {
+			if ($offset === $this->_options['model']) {
+				return true;
+			}
+			foreach (get_object_vars($this->_instance) as $property => $value) {
+				if (is_object($value)) {
+					if ($value instanceof Collection || $value instanceof HasManyPlaceholder) {
+						$model = ucfirst(Inflector::singularize($property));
+					} else {
+						$model = ucfirst($property);
+					}
+					if ($offset === $model) {
+						return true;
+					}
+				}
+			}
+			return false;
+		} else {
+			$this->_iterator->offsetExists($offset);
+		}
 	}
 
 	function offsetSet($offset, $value) {
@@ -136,6 +156,29 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 
 	function offsetUnset($offset) {
 		throw new Exception('Not implemented');
+	}
+
+	// Iterator interface
+
+	public function current() {
+		// @todo Return the same CakeModelWrapper when the instance is the same.
+		return new CakeModelWrapper($this->_iterator->current(), $this->_options);
+	}
+
+	public function key() {
+		return $this->_iterator->key();
+	}
+
+	public function next() {
+		return $this->_iterator->next();
+	}
+
+	public function rewind() {
+		return $this->_iterator->rewind();
+	}
+
+	public function valid() {
+		return $this->_iterator->valid();
 	}
 
 	/**
