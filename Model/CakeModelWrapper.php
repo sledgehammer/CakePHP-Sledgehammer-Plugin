@@ -13,6 +13,11 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 	private $_instance;
 
 	/**
+	 * @var Iterator
+	 */
+	private $_iterator;
+
+	/**
 	 * @var array array(
 	 *   'model' => string,
 	 *	 'resursive' => int Default: 1
@@ -21,14 +26,20 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 	private $_options;
 
 	/**
-	 * @param stdClass $instance
+	 * @param stdClass|Collection $data The instance of collection
 	 */
-	function __construct($instance, $options = array()) {
-		$this->_instance = $instance;
+	function __construct($data, $options = array()) {
+		if ($data instanceof Collection) {
+			$this->_instance = false;
+			$this->_iterator = $data;
+		} else {
+			$this->_instance = $data;
+			$this->_iterator = new ArrayIterator(self::objectToArray($data));
+		}
 		$this->_options = $options;
-		if (isset($this->_options['model']) == false) {
+		if (isset($this->_options['model']) == false && $this->_instance) {
 			// Autodetect model
-			$this->_options['model'] = get_class($instance);
+			$this->_options['model'] = get_class($data);
 			$pos = strrpos($this->_options['model'], '\\');
 			if ($pos !== false) {
 				$this->_options['model'] = substr($this->_options['model'], $pos + 1);
@@ -55,6 +66,19 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 			$recursive = $this->_options['recursive'];
 		}
 		$data = array();
+		if ($this->_instance === false) {
+			// Collection mode
+			$wrapper = null;
+			foreach ($this->_iterator as $instance) {
+				if ($wrapper === null) {
+					$wrapper = new CakeModelWrapper($instance, $this->_options);
+				}
+				$wrapper->_instance = $instance;
+				$data[] = $wrapper->toArray($recursive);
+			}
+			return $data;
+		}
+		// Instance mode
 		$data[$this->_options['model']] = self::objectToArray($this->_instance, 0);
 		if ($recursive < 0) {
 			return $data;
@@ -81,21 +105,25 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess {
 	}
 
 	function offsetGet($offset) {
-		if ($offset === $this->_options['model']) {
-			return self::objectToArray($this->_instance);
-		} else {
-			$property = lcfirst(Inflector::pluralize($offset));
-			if (property_exists($this->_instance, $property)) {
-				$collection = $this->_instance->$property;
-				$data = array();
-				foreach ($collection as $item) {
-					$data[] = self::objectToArray($item);
-				}
-				return $data;
+		if ($this->_instance) {
+			if ($offset === $this->_options['model']) {
+				return self::objectToArray($this->_instance);
 			} else {
-				notice('Offset ['.$offset.'] not found');
+				$property = lcfirst(Inflector::pluralize($offset));
+				if (property_exists($this->_instance, $property)) {
+					$collection = $this->_instance->$property;
+					$data = array();
+					foreach ($collection as $item) {
+						$data[] = self::objectToArray($item);
+					}
+					return $data;
+				}
 			}
+		} elseif (is_int($offset)) {
+			dump($this->_iterator->offsetGet($offset));
 		}
+		notice('Offset ['.$offset.'] not found');
+
 	}
 
 	function offsetExists($offset) {
