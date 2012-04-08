@@ -14,6 +14,7 @@ if (file_exists(ROOT.'/sledgehammer/core/init_framework.php') === false) {
 	return;
 }
 define('SledgeHammer\MICROTIME_START', TIME_START);
+define('SledgeHammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
 if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'test.php') { // A webrequest?
 	require_once(ROOT.'/sledgehammer/core/render_public_folders.php');
 }
@@ -31,6 +32,7 @@ if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
 //*
 // Don't show notices when a class is unknown to the AutoLoader (allow Cake to load the class)
 Framework::$autoLoader->standalone = false;
+App::uses('CakeModelWrapper', 'SledgeHammer.Model');
 /*/
 // Register CakePHP and Application classes to SledgeHammer's AutoLoader
 $ignoreFiles = array(
@@ -71,7 +73,12 @@ Framework::$autoLoader->importFolder(APP, array(
 // */
 
 // Don't override the SlegdeHammer ErrorHandler
-Configure::write('Error', array());
+//Configure::write('Error', array());
+Configure::write('Error', array(
+		'handler' => 'SledgeHammer\ErrorHandler_trigger_error_callback',
+		'level' => SledgeHammer\E_MAX,
+		'trace' => true
+	));
 
 /**
  * An Exception handler callback that reports the exception to SledgeHander before it lets Cake handle the exception.

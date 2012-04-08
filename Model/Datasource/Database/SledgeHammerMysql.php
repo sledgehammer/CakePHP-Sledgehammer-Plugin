@@ -1,16 +1,17 @@
 <?php
-/**
- * MySQL class that uses the SledgeHammer's (PDO) Database class
- * Add extra debuggingifo to cake and allows sledgehammer to use the cake's database config and connection. 
- */
 App::uses('DboSource', 'Model/Datasource');
 App::uses('Mysql', 'Model/Datasource/Database');
-
 /**
- * MySQL DBO driver object
+ * SledgeHammerMysql
  *
- * Provides connection and SQL generation for MySQL RDMS
+ * A DboSource subclass that uses the SledgeHammer's (PDO) Database class.
+ * Adds extra debugging information and allows SledgeHammer classes to reuse cake's DATABASE_CONFIG and connections.
  *
+ * Caveat:
+ *   $db = getDatabase('default');
+ * won't work until cake accesses the datasource, use:
+ *   ConnectionManager::getDataSource('default');
+ * To force a connection.
  */
 class SledgeHammerMysql extends Mysql {
 
@@ -19,7 +20,7 @@ class SledgeHammerMysql extends Mysql {
  *
  * @var string
  */
-	public $description = "SledgeHammer's MySQL DBO Driver";
+	public $description = "MySQL DBO driver (SledgeHammer edition)";
 
 /**
  * Reference to the Database/PDO object connection
@@ -32,7 +33,7 @@ class SledgeHammerMysql extends Mysql {
 		unset($this->configKeyName);
 		parent::__construct($config, $autoConnect);
 	}
-	
+
 	function __set($property, $value) {
 		if ($property == 'configKeyName') {
 			 \SledgeHammer\Database::$instances[$value] = $this->_connection;
