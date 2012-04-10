@@ -2,6 +2,7 @@
 use SledgeHammer\Inflector;
 use SledgeHammer\Collection;
 use SledgeHammer\HasManyPlaceholder;
+use SledgeHammer\BelongsToPlaceholder;
 /**
  * CakeModelWrapper present a model instance as an array.
  */
@@ -59,7 +60,7 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 	 *     1: Include hasMany
 	 *     2: Include the belongsTo of the hasMany
 	 *
-	 * @return type
+	 * @return array
 	 */
 	function toArray($recursive = null) {
 		if ($recursive === null) {
@@ -91,13 +92,18 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 					// HasMany
 					if ($recursive >= 1) {
 						$model = ucfirst(Inflector::singularize($property));
+						$data[$model] = array();
 						foreach ($value as $object) {
 							$data[$model][]  = self::objectToArray($object, $depth);
 						}
 					}
 				} else {
 					// BelongsTo
-					$data[ucfirst($property)] = self::objectToArray($value, $depth);
+					if ($value instanceof BelongsToPlaceholder) {
+						$value->id = $value->id; // replace placeholder
+						$value = $this->_instance->$property;
+					}
+					$data[Inflector::camelCase($property)] = self::objectToArray($value, $depth);
 				}
 			}
 		}
@@ -111,7 +117,7 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 			if ($offset === $this->_options['model']) {
 				return self::objectToArray($this->_instance);
 			} else {
-				$property = lcfirst(Inflector::pluralize($offset));
+				$property = self::variablize($offset);
 				if (property_exists($this->_instance, $property)) {
 					$collection = $this->_instance->$property;
 					$data = array();
@@ -192,6 +198,7 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 		foreach (get_object_vars($object) as $property => $value) {
 			if (is_object($value)) {
 				if ($value instanceof Collection || $value instanceof HasManyPlaceholder) {
+					// HasMany
 					if ($depth > 0) {
 						$model = ucfirst(Inflector::singularize($property));
 						foreach ($value as $object) {
@@ -199,9 +206,14 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 						}
 					}
 				} else {
+					// BelongsTo
 					$data[$property.'_id'] = $value->id;
 					if ($depth > 0) {
-						$data[ucfirst($property)] = self::objectToArray($value, $depth - 1);
+						if ($value instanceof BelongsToPlaceholder) {
+							$value->id = $value->id; // Replaces placeholder
+							$value = $object->$property;
+						}
+						$data[Inflector::camelCase($property)] = self::objectToArray($value, $depth - 1);
 					}
 				}
 			} else {
@@ -210,7 +222,6 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 		}
 		return $data;
 	}
-
 }
 
 ?>

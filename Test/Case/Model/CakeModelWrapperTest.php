@@ -1,6 +1,5 @@
 <?php
-App::uses('Customer', 'Model');
-App::uses('Order', 'Model');
+require(CAKE_CORE_INCLUDE_PATH.'/Cake/Test/Case/Model/models.php');
 /**
  * CakeModelWrapper  Test Case
  */
@@ -11,7 +10,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	 *
 	 * @var array
 	 */
-	public $fixtures = array('app.customer', 'app.order');
+	public $fixtures = array('core.Home', 'core.AnotherArticle', 'core.Advertisement');
 
 	/**
 	 * setUp method
@@ -27,60 +26,63 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 			'test' => new SledgeHammer\Database('sqlite:/tmp/cakephp_test.sqlite'),
 		);
 		$db = SledgeHammer\getDatabase('test');
-		$foreignKeys = $db->query('PRAGMA foreign_key_list(orders)');
+		$foreignKeys = $db->query('PRAGMA foreign_key_list(Homes)');
 		if (count($foreignKeys->fetchAll()) == 0) {
 			// Add missing foreign_key
-			$sql = $db->fetchValue("SELECT sql FROM sqlite_master WHERE type='table' AND tbl_name='orders'");
-			$db->query('ALTER TABLE orders RENAME TO orders_backup');
-			$createStatement = substr(trim($sql), 0, -1).",\n\tFOREIGN KEY (customer_id) REFERENCES customers (id)\n)";
+			$sql = $db->fetchValue("SELECT sql FROM sqlite_master WHERE type='table' AND tbl_name='homes'");
+			$db->query('ALTER TABLE homes RENAME TO homes_backup');
+			$createStatement = substr(trim($sql), 0, -1).",\n\t";
+			$createStatement .= "FOREIGN KEY (advertisement_id) REFERENCES advertisements (id),\n\t";
+			$createStatement .= "FOREIGN KEY (another_article_id) REFERENCES another_articles (id))";
 			$db->query($createStatement);
-			$db->query('INSERT INTO orders SELECT * FROM orders_backup');
-			$db->query('DROP TABLE orders_backup');
+			$db->query('INSERT INTO homes SELECT * FROM homes_backup');
+			$db->query('DROP TABLE homes_backup');
 			try {
-				ConnectionManager::getDataSource('test')->query('SELECT * FROM orders');
+				ConnectionManager::getDataSource('test')->query('SELECT * FROM homes');
 				$this->fail('No "SQLSTATE[HY000]: General error: 17 database schema has changed" error?');
 			} catch (Exception $e) {
 				$this->assertEquals($e->getMessage(), 'SQLSTATE[HY000]: General error: 17 database schema has changed');
 			}
 		}
 		$backend = new SledgeHammer\DatabaseRepositoryBackend('test');
-		$backend->configs['Customer']->class = 'stdClass';
-		$backend->configs['Order']->class = 'stdClass';
+		$backend->configs['Home']->class = 'stdClass';
+		$backend->configs['Advertisement']->class = 'stdClass';
+		$backend->configs['AnotherArticle']->class = 'stdClass';
 		SledgeHammer\getRepository()->registerBackend($backend);
 
-		$this->Customer = ClassRegistry::init('Customer');
-		$this->Order = ClassRegistry::init('Order');
+		$this->Advertisement = ClassRegistry::init('Advertisement');
+		$this->Home = ClassRegistry::init('Home');
 	}
 
 	function test_find_first() {
-		$this->compareFindFirst($this->Customer, '1', -1);
-		$this->compareFindFirst($this->Customer, '1', 0);
-		$this->compareFindFirst($this->Customer, '1', 1);
-		$this->compareFindFirst($this->Customer, '1', 2);
+		$this->compareFindFirst($this->Advertisement, '1', -1);
+		$this->compareFindFirst($this->Advertisement, '1', 0);
+		$this->compareFindFirst($this->Advertisement, '1', 1);
+		$this->compareFindFirst($this->Advertisement, '1', 2);
 
-		$this->compareFindFirst($this->Order, '1', -1);
-		$this->compareFindFirst($this->Order, '1', 0);
-		$this->compareFindFirst($this->Order, '1', 1);
-		$this->compareFindFirst($this->Order, '1', 2);
+		$this->compareFindFirst($this->Home, '1', -1);
+		$this->compareFindFirst($this->Home, '1', 0);
+		$this->compareFindFirst($this->Home, '1', 1);
+		$this->compareFindFirst($this->Home, '1', 2);
 	}
 
 	function test_find_all() {
-		$this->compareFindAll($this->Customer, -1);
-		$this->compareFindAll($this->Customer, 0);
-		$this->compareFindAll($this->Customer, 1);
-		$this->compareFindAll($this->Customer, 2);
+		$this->compareFindAll($this->Advertisement, -1);
+		$this->compareFindAll($this->Advertisement, 0);
+		$this->compareFindAll($this->Advertisement, 1);
+		$this->compareFindAll($this->Advertisement, 2);
 
-		$this->compareFindAll($this->Order, -1);
-		$this->compareFindAll($this->Order, 0);
-		$this->compareFindAll($this->Order, 1);
-		$this->compareFindAll($this->Order, 2);
+		$this->compareFindAll($this->Home, -1);
+		$this->compareFindAll($this->Home, 0);
+		$this->compareFindAll($this->Home, 1);
+		$this->compareFindAll($this->Home, 2);
 		ob_flush();
 	}
 
 	function test_offset_exist_in_instance() {
 		$repo = SledgeHammer\getRepository();
-		$wrapped = new CakeModelWrapper($repo->getOrder(1), array('model' => 'Order'));
-		$this->assertTrue($wrapped->offsetExists('Customer'));
+		$wrapped = new CakeModelWrapper($repo->getHome(1), array('model' => 'Home'));
+		$this->assertTrue($wrapped->offsetExists('Advertisement'));
 		$this->assertFalse($wrapped->offsetExists('BlaBla'));
 	}
 
@@ -136,7 +138,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	 * @return void
 	 */
 	public function tearDown() {
-		unset($this->Customer);
+		unset($this->Advertisement);
 
 		parent::tearDown();
 	}
