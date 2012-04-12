@@ -72,27 +72,26 @@ Framework::$autoLoader->importFolder(APP, array(
 ));
 // */
 
-// Don't override the SlegdeHammer ErrorHandler
-//Configure::write('Error', array());
-Configure::write('Error', array(
-		'handler' => 'SledgeHammer\ErrorHandler_trigger_error_callback',
-		'level' => SledgeHammer\E_MAX,
-		'trace' => true
-	));
+// Use the SledgeHammer ErrorHandler
+Configure::write('Error.handler', 'SledgeHammer\ErrorHandler_trigger_error_callback');
+Configure::write('Error.level', SledgeHammer\E_MAX);
 
 /**
  * An Exception handler callback that reports the exception to SledgeHander before it lets Cake handle the exception.
  *
  * @param Exception $exception
  */
-function handle_exception_callback($exception) {
+function sledgehammer_plugin_handle_exception_callback($exception) {
+	if (headers_sent() === false) {
+		$httpCode = 500;
+		if ($exception instanceof CakeException) {
+			$httpCode = $exception->getCode();
+		}
+		header($_SERVER['SERVER_PROTOCOL'].' '.$httpCode.' '.$exception->getMessage());
+	}
 	SledgeHammer\ErrorHandler::handle_exception($exception); // mail/backtrace etc
-	ErrorHandler::handleException($exception); // Show 404/500 error page (with the CakePHP ErrorHandler)
+	ErrorHandler::handleException($exception); // Show the 404/500 error page (with using CakePHP's ErrorHandler)
 }
 
-Configure::write('Exception', array(
-	'handler' => 'handle_exception_callback',
-	'renderer' => 'ExceptionRenderer',
-	'log' => true
-));
+Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
 ?>
