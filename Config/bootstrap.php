@@ -83,15 +83,14 @@ Configure::write('Error.level', SledgeHammer\E_MAX);
  */
 function sledgehammer_plugin_handle_exception_callback($exception) {
 	if (headers_sent() === false) {
-		$httpCode = 500;
-		if ($exception instanceof CakeException) {
-			$httpCode = $exception->getCode();
+		$code = $exception->getCode();
+		if ($code < 400 || $code >= 506) {
+			$code = 500;
 		}
-		header($_SERVER['SERVER_PROTOCOL'].' '.$httpCode.' '.$exception->getMessage());
+		header($_SERVER['SERVER_PROTOCOL'].' '.$code);
 	}
 	SledgeHammer\ErrorHandler::handle_exception($exception); // mail/backtrace etc
-	ErrorHandler::handleException($exception); // Show the 404/500 error page (with using CakePHP's ErrorHandler)
+	ErrorHandler::handleException($exception); // Show the error page (with using CakePHP's Exception.renderer)
 }
-
 Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
 ?>

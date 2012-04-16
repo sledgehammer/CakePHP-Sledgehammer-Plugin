@@ -55,3 +55,5 @@ Add the statusbar element just before the `</body>` tag.
 #### SledgeHammer Database ####
 
 Upgrade your datasource in `APP/Config/database.php` from `Database/Mysql` into `SledgeHammer.Database/SledgeHammerMysql`
+
+Default to UTF-8 encoding and reports sql warnings & notices.

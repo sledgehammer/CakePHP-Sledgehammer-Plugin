@@ -9,5 +9,5 @@ if ($hideStatusbar) {
 echo $this->Html->css('/core/css/debug.css'); ?>
 <div class="statusbar" id="statusbar">
 	<?php SledgeHammer\statusbar(); ?>
-	<a href="javascript:document.getElementById('statusbar').style.display='none';" title="Hide statusbar" class="statusbar_hide">&times;</a>
+	<a href="javascript:document.getElementById('statusbar').style.display='none';" title="Hide statusbar" class="statusbar-close">&times;</a>
 </div>
