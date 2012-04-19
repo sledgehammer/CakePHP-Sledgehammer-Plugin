@@ -14,7 +14,7 @@ if (file_exists(ROOT.'/sledgehammer/core/init_framework.php') === false) {
 	return;
 }
 define('SledgeHammer\MICROTIME_START', TIME_START);
-define('SledgeHammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
+//define('SledgeHammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
 if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'test.php') { // A webrequest?
 	require_once(ROOT.'/sledgehammer/core/render_public_folders.php');
 }

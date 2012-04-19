@@ -20,6 +20,11 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		$filename = SledgeHammer\Framework::$autoLoader->getFilename('SledgeHammer\Repository');
+		if ($filename === null) {
+			$this->markTestSkipped('SledgeHammer ORM module not installed');
+		}
+
 		// Reset DB & Repository
 		SledgeHammer\Repository::$instances = array();
 		SledgeHammer\Database::$instances = array(
@@ -95,7 +100,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	 */
 	private function compareFindFirst($model, $id, $recursive) {
 		$cakeResult = $model->find('first', array(
-			'condition' => array(
+			'conditions' => array(
 				$model->alias.'.id' => 1
 			),
 			'recursive' => $recursive
