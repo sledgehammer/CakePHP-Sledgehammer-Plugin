@@ -157,7 +157,7 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 			}
 			return false;
 		} else {
-			$this->_iterator->offsetExists($offset);
+			return $this->_iterator->offsetExists($offset);
 		}
 	}
 
