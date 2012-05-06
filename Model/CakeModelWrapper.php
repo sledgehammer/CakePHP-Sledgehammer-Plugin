@@ -117,8 +117,13 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 			if ($offset === $this->_options['model']) {
 				return self::objectToArray($this->_instance);
 			} else {
-				$property = self::variablize($offset);
-				if (property_exists($this->_instance, $property)) {
+				$property = lcfirst($offset);
+				if (property_exists($this->_instance, $property)) { // BelongsTo relation?
+					$this->_instance->$property->id = $this->_instance->$property->id; // Replaces placeholder
+					return self::objectToArray($this->_instance->$property);
+				}
+				$property = lcfirst(Inflector::pluralize($offset));
+				if (property_exists($this->_instance, $property)) { // HasMany relation?
 					$collection = $this->_instance->$property;
 					$data = array();
 					foreach ($collection as $item) {
@@ -167,7 +172,7 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 	// Iterator interface
 
 	public function current() {
-		// @todo Return the same CakeModelWrapper when the instance is the same.
+		// @todo Return the same CakeModelWrapper when the instance is the same. (when ->current() is called twice)
 		return new CakeModelWrapper($this->_iterator->current(), $this->_options);
 	}
 
