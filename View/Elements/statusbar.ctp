@@ -6,8 +6,13 @@ if (isset($_GET['debug'])) {
 if ($hideStatusbar) {
 	return;
 }
-echo $this->Html->css('/core/css/debug.css'); ?>
-<div class="statusbar" id="statusbar">
+echo $this->Html->css('/core/css/debug.css');
+$placeholder = isset($placeholder) ? $placeholder : true;
+if ($placeholder) {
+	echo "<div class=\"statusbar-placeholder\"></div>";
+}
+?>
+<div class="statusbar">
 	<?php SledgeHammer\statusbar(); ?>
-	<a href="javascript:document.getElementById('statusbar').style.display='none';" title="Hide statusbar" class="statusbar-close">&times;</a>
+	<a href="#" onclick="this.parentNode.style.display='none';<?php if ($placeholder) { echo "this.parentNode.parentNode.getElementsByClassName('statusbar-placeholder')[0].style.display='none';"; } ?>return false;" title="Hide statusbar" class="statusbar-close">&times;</a>
 </div>
