@@ -49,7 +49,10 @@ class RepositoryDataSource extends DataSource {
 					$this->_descriptions[$table][$property.'_id'] = array();
 				}
 				foreach ($config->properties as $column => $property) {
-					$this->_descriptions[$table][$property] = array();
+					$this->_descriptions[$table][$property] = array(
+						'type' => null,
+						'length' => null,
+					);
 				}
 				// Move ID to the beginning of the array.
 				$id = $this->_descriptions[$table][$config->id[0]];
@@ -65,6 +68,14 @@ class RepositoryDataSource extends DataSource {
 			return '__COUNT__';
 		}
 		warning('Calculation type: "'.$type.'" not suported');
+	}
+
+	function create(Model $Model, $fields = null, $values = null) {
+		$repo = \SledgeHammer\getRepository($this->repository);
+		$instance = $repo->create($this->resolveModel($Model));
+		$this->importData($Model, array_combine($fields, $values), $instance);
+		$repo->save($this->resolveModel($Model), $instance);
+		return true;
 	}
 
 	/**
@@ -88,7 +99,7 @@ class RepositoryDataSource extends DataSource {
 	 */
 	function read(Model $Model, $queryData = array()) {
 		$repo = \SledgeHammer\getRepository($this->repository);
-		$result = $repo->all(get_class($Model));
+		$result = $repo->all($this->resolveModel($Model));
 		$conditions = array();
 		if ($queryData['conditions'] !== null) {
 			foreach ($queryData['conditions'] as $column => $value) {
@@ -140,28 +151,52 @@ class RepositoryDataSource extends DataSource {
 	 */
 	function update(Model $Model, $fields = null, $values = null) {
 		$repo = \SledgeHammer\getRepository($this->repository);
-		$data = array_combine($fields, $values);
-		$instance = $repo->get(get_class($Model), $Model->id);
+		$instance = $repo->get($this->resolveModel($Model), $Model->id);
+		$this->importData($Model, array_combine($fields, $values), $instance);
+		$repo->save($this->resolveModel($Model), $instance);
+		return true;
+	}
+
+	public function delete(Model $Model, $id = null) {
+		if (is_array($id)) {
+			foreach ($id as $column => $value) {
+				if (\SledgeHammer\text($column)->startsWith($Model->alias.'.')) {
+					unset($id[$column]);
+					$id[substr($column, strlen($Model->alias) + 1)] = $value; // Remove alias
+				}
+			}
+		}
+		$repo = \SledgeHammer\getRepository($this->repository);
+		$repo->delete(get_class($Model), $id);
+		return true;
+	}
+
+	private function importData(Model $Model, $data, $instance) {
+		$repo = \SledgeHammer\getRepository($this->repository);
+		$config = RepositoryInspector::getModelConfig($repo, $this->resolveModel($Model));
 		foreach ($data as $field => $value) {
 			if (property_exists($instance, $field)) {
 				$instance->$field = $value;
 				continue;
 			}
 			if (substr($field, -3) === '_id' && property_exists($instance, substr($field, 0, -3))) { // BelongTo?
-				$property = substr($field, 0, -3);
-				if ($instance->$property->id === $value) {
-					continue;
+				$property =  substr($field, 0, -3);
+				if ($value === null) {
+					$instance->$property = null;
+				} elseif ($instance->$property !== null && $instance->$property->id === $value) {
+					continue; // relation unchanged
 				}
-				$instance->$property->id = $instance->$property->id; // Replace placeholder
-				$modelClass = $repo->resolveModel($instance->$property);
-				$instance->$property = $repo->get($modelClass, $value);
+				$instance->$property = $repo->get($config->belongsTo[$property]['model'], $value);
 			} else {
 				notice('Ignoring field "'.$field.'"', array('Value' => $value));
 			}
 		}
-		$repo->save(get_class($Model), $instance);
-		return true;
 	}
+
+	private function resolveModel(Model $Model) {
+		return get_class($Model);
+	}
+
 }
 
 ?>
