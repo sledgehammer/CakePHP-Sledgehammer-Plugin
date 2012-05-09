@@ -1,5 +1,6 @@
 <?php
 App::uses('DataSource', 'Model/Datasource');
+App::uses('RepositoryInspector', 'SledgeHammer.Model/Datasource');
 /**
  * DataSource adapter to use SledgeHammer\s Repository as backend for AppModels
  */
@@ -40,17 +41,26 @@ class RepositoryDataSource extends DataSource {
 
 	function describe($model) {
 		if (empty($this->_descriptions)) {
+			$repo = \SledgeHammer\getRepository($this->repository);
 			$sources = $this->listSources();
 			foreach ($sources as $table) {
-				$this->_descriptions[$table] = array(
-					'id' => array(), // assume 'id' column
-				);
+				$config = RepositoryInspector::getModelConfig($repo, SledgeHammer\Inflector::modelize($table));
+				foreach ($config->belongsTo as $property => $belongsTo) {
+					$this->_descriptions[$table][$property.'_id'] = array();
+				}
+				foreach ($config->properties as $column => $property) {
+					$this->_descriptions[$table][$property] = array();
+				}
+				// Move ID to the beginning of the array.
+				$id = $this->_descriptions[$table][$config->id[0]];
+				unset($this->_descriptions[$table][$config->id[0]]);
+				SledgeHammer\array_key_unshift($this->_descriptions[$table], $config->id[0], $id);
 			}
 		}
 		return parent::describe($model);
 	}
 
-	function calculate(Model $model, $type) {
+	function calculate(Model $Model, $type) {
 		if ($type === 'count') {
 			return '__COUNT__';
 		}
@@ -60,7 +70,7 @@ class RepositoryDataSource extends DataSource {
 	/**
 	 * Retrieving (& filtering & sorting) data
 	 *
-	 * @param Model $model
+	 * @param Model $Model
 	 * @param array $queryData array(
 	 *   'conditions' => array(), PARTIAL SUPPORT,
 	 *   'fields' => NULL,        IGNORED
@@ -76,14 +86,14 @@ class RepositoryDataSource extends DataSource {
 	 * )
 	 * @return \CakeModelWrapper
 	 */
-	function read(Model $model, $queryData = array()) {
+	function read(Model $Model, $queryData = array()) {
 		$repo = \SledgeHammer\getRepository($this->repository);
-		$result = $repo->all(get_class($model));
+		$result = $repo->all(get_class($Model));
 		$conditions = array();
 		if ($queryData['conditions'] !== null) {
 			foreach ($queryData['conditions'] as $column => $value) {
-				if (\SledgeHammer\text($column)->startsWith($model->alias.'.')) {
-					$column = substr($column, strlen($model->alias) + 1); // Remove alias
+				if (\SledgeHammer\text($column)->startsWith($Model->alias.'.')) {
+					$column = substr($column, strlen($Model->alias) + 1); // Remove alias
 				}
 				$conditions[$column] = $value;
 			}
@@ -94,10 +104,9 @@ class RepositoryDataSource extends DataSource {
 		foreach (array_reverse($queryData['order']) as $order) {
 			if ($order) {
 				foreach ($order as $column => $direction) {
-					if (\SledgeHammer\text($column)->startsWith($model->alias.'.')) {
-						$column = substr($column, strlen($model->alias) + 1); // Remove alias
+					if (\SledgeHammer\text($column)->startsWith($Model->alias.'.')) {
+						$column = substr($column, strlen($Model->alias) + 1); // Remove alias
 					}
-
 					if (strcasecmp($direction, 'asc') === 0) {
 						$result = $result->orderBy($column);
 					} elseif (strcasecmp($direction, 'desc') === 0) {
@@ -121,6 +130,38 @@ class RepositoryDataSource extends DataSource {
 		return $wrapper;
 	}
 
+	/**
+	 * Save changes.
+	 *
+	 * @param Model $Model
+	 * @param array $fields
+	 * @param array $values
+	 * @return boolean
+	 */
+	function update(Model $Model, $fields = null, $values = null) {
+		$repo = \SledgeHammer\getRepository($this->repository);
+		$data = array_combine($fields, $values);
+		$instance = $repo->get(get_class($Model), $Model->id);
+		foreach ($data as $field => $value) {
+			if (property_exists($instance, $field)) {
+				$instance->$field = $value;
+				continue;
+			}
+			if (substr($field, -3) === '_id' && property_exists($instance, substr($field, 0, -3))) { // BelongTo?
+				$property = substr($field, 0, -3);
+				if ($instance->$property->id === $value) {
+					continue;
+				}
+				$instance->$property->id = $instance->$property->id; // Replace placeholder
+				$modelClass = $repo->resolveModel($instance->$property);
+				$instance->$property = $repo->get($modelClass, $value);
+			} else {
+				notice('Ignoring field "'.$field.'"', array('Value' => $value));
+			}
+		}
+		$repo->save(get_class($Model), $instance);
+		return true;
+	}
 }
 
 ?>
