@@ -73,7 +73,7 @@ Framework::$autoLoader->importFolder(APP, array(
 // */
 
 // Use the SledgeHammer ErrorHandler
-Configure::write('Error.handler', 'SledgeHammer\ErrorHandler_trigger_error_callback');
+Configure::write('Error.handler', array(SledgeHammer\Framework::$errorHandler, 'error_callback'));
 Configure::write('Error.level', SledgeHammer\E_MAX);
 
 /**
@@ -89,7 +89,7 @@ function sledgehammer_plugin_handle_exception_callback($exception) {
 		}
 		header($_SERVER['SERVER_PROTOCOL'].' '.$code);
 	}
-	SledgeHammer\ErrorHandler::handle_exception($exception); // mail/backtrace etc
+	report_exception($exception); // mail/backtrace etc
 	ErrorHandler::handleException($exception); // Show the error page (with using CakePHP's Exception.renderer)
 }
 Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
