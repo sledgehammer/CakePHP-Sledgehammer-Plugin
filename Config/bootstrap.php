@@ -73,7 +73,7 @@ Framework::$autoLoader->importFolder(APP, array(
 // */
 
 // Use the SledgeHammer ErrorHandler
-Configure::write('Error.handler', array(SledgeHammer\Framework::$errorHandler, 'error_callback'));
+Configure::write('Error.handler', array(SledgeHammer\Framework::$errorHandler, 'errorCallback'));
 Configure::write('Error.level', SledgeHammer\E_MAX);
 
 /**
