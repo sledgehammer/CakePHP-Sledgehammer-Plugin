@@ -1,11 +1,15 @@
 <?php
+/**
+ * SledgehammerMysql
+ * @package SledgehammerPlugin
+ */
 App::uses('DboSource', 'Model/Datasource');
 App::uses('Mysql', 'Model/Datasource/Database');
 /**
- * SledgeHammerMysql
+ * SledgehammerMysql
  *
- * A DboSource subclass that uses the SledgeHammer's (PDO) Database class.
- * Adds extra debugging information and allows SledgeHammer classes to reuse cake's DATABASE_CONFIG and connections.
+ * A DboSource subclass that uses the Sledgehammer's (PDO) Database class.
+ * Adds extra debugging information and allows Sledgehammer classes to reuse cake's DATABASE_CONFIG and connections.
  *
  * Caveat:
  *   $db = getDatabase('default');
@@ -13,19 +17,19 @@ App::uses('Mysql', 'Model/Datasource/Database');
  *   ConnectionManager::getDataSource('default');
  * To force a connection.
  */
-class SledgeHammerMysql extends Mysql {
+class SledgehammerMysql extends Mysql {
 
 /**
  * Datasource description
  *
  * @var string
  */
-	public $description = "MySQL DBO driver (SledgeHammer edition)";
+	public $description = "MySQL DBO driver (Sledgehammer edition)";
 
 /**
  * Reference to the Database/PDO object connection
  *
- * @var \SledgeHammer\Database $_connection
+ * @var \Sledgehammer\Database $_connection
  */
 	protected $_connection = null;
 
@@ -36,7 +40,7 @@ class SledgeHammerMysql extends Mysql {
 
 	function __set($property, $value) {
 		if ($property == 'configKeyName') {
-			 \SledgeHammer\Database::$instances[$value] = $this->_connection;
+			 \Sledgehammer\Database::$instances[$value] = $this->_connection;
 		}
 		$this->$property = $value;
 	}
@@ -64,7 +68,7 @@ class SledgeHammerMysql extends Mysql {
 			} else {
 				$dsn = "mysql:unix_socket={$config['unix_socket']};dbname={$config['database']}";
 			}
-			$this->_connection = new \SledgeHammer\Database(
+			$this->_connection = new \Sledgehammer\Database(
 				$dsn,
 				$config['login'],
 				$config['password'],

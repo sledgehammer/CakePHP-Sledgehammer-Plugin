@@ -1,28 +1,28 @@
 <?php
-use SledgeHammer\Framework;
+
 /**
- * Initialize the SledgeHammer framework
- * and configure Cake to use SledgeHammer\ErrorHandler
- *
- * @package SledgeHammerPlugin
+ * Initialize the Sledgehammer framework and configure Cake to use Sledgehammer\ErrorHandler
+ * @package SledgehammerPlugin
  */
-if (defined('SledgeHammer\INITIALIZED')) {
+use Sledgehammer\Framework;
+
+if (defined('Sledgehammer\INITIALIZED')) {
 	return;
 }
 if (file_exists(ROOT.'/sledgehammer/core/init_framework.php') === false) {
-	trigger_error('SledgeHammer Framework not found in "'.ROOT.'/sledgehammer/"', E_USER_WARNING);
+	trigger_error('Sledgehammer Framework not found in "'.ROOT.'/sledgehammer/"', E_USER_WARNING);
 	return;
 }
-define('SledgeHammer\MICROTIME_START', TIME_START);
-//define('SledgeHammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
+define('Sledgehammer\MICROTIME_START', TIME_START);
+//define('Sledgehammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
 if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'test.php') { // A webrequest?
 	require_once(ROOT.'/sledgehammer/core/render_public_folders.php');
 }
 if (function_exists('posix_getpwuid')) {
 	$posix_user = posix_getpwuid(posix_geteuid());
-	define('SledgeHammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
+	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
 } else {
-	define('SledgeHammer\TMP_DIR', TMP.'sledgehammer/');
+	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/');
 
 }
 require_once(ROOT.'/sledgehammer/core/init_framework.php');
@@ -32,9 +32,9 @@ if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
 //*
 // Don't show notices when a class is unknown to the AutoLoader (allow Cake to load the class)
 Framework::$autoLoader->standalone = false;
-App::uses('CakeModelWrapper', 'SledgeHammer.Model');
+App::uses('CakeModelWrapper', 'Sledgehammer.Model');
 /*/
-// Register CakePHP and Application classes to SledgeHammer's AutoLoader
+// Register CakePHP and Application classes to Sledgehammer's AutoLoader
 $ignoreFiles = array(
 	CAKE.'basics.php',
 	CAKE.'bootstrap.php',
@@ -72,9 +72,9 @@ Framework::$autoLoader->importFolder(APP, array(
 ));
 // */
 
-// Use the SledgeHammer ErrorHandler
-Configure::write('Error.handler', array(SledgeHammer\Framework::$errorHandler, 'errorCallback'));
-Configure::write('Error.level', SledgeHammer\E_MAX);
+// Use the Sledgehammer ErrorHandler
+Configure::write('Error.handler', array(Sledgehammer\Framework::$errorHandler, 'errorCallback'));
+Configure::write('Error.level', Sledgehammer\E_MAX);
 
 /**
  * An Exception handler callback that reports the exception to SledgeHander before it lets Cake handle the exception.

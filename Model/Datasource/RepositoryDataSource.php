@@ -1,8 +1,12 @@
 <?php
-App::uses('DataSource', 'Model/Datasource');
-App::uses('RepositoryInspector', 'SledgeHammer.Model/Datasource');
 /**
- * DataSource adapter to use SledgeHammer\s Repository as backend for AppModels
+ * RepositoryDataSource
+ * @package SledgehammerPlugin
+ */
+App::uses('DataSource', 'Model/Datasource');
+App::uses('RepositoryInspector', 'Sledgehammer.Model/Datasource');
+/**
+ * DataSource adapter to use Sledgehammer\s Repository as backend for AppModels
  */
 class RepositoryDataSource extends DataSource {
 
@@ -24,7 +28,7 @@ class RepositoryDataSource extends DataSource {
 	 */
 	function listSources($data = null) {
 		if ($data === null && $this->_sources === null) {
-			$repo = \SledgeHammer\getRepository($this->repository);
+			$repo = \Sledgehammer\getRepository($this->repository);
 			$dir = new DirectoryIterator(APP.'Model');
 			$data = array();
 			foreach ($dir as $entry) {
@@ -41,10 +45,10 @@ class RepositoryDataSource extends DataSource {
 
 	function describe($model) {
 		if (empty($this->_descriptions)) {
-			$repo = \SledgeHammer\getRepository($this->repository);
+			$repo = \Sledgehammer\getRepository($this->repository);
 			$sources = $this->listSources();
 			foreach ($sources as $table) {
-				$config = RepositoryInspector::getModelConfig($repo, SledgeHammer\Inflector::modelize($table));
+				$config = RepositoryInspector::getModelConfig($repo, Sledgehammer\Inflector::modelize($table));
 				foreach ($config->belongsTo as $property => $belongsTo) {
 					$this->_descriptions[$table][$property.'_id'] = array();
 				}
@@ -57,7 +61,7 @@ class RepositoryDataSource extends DataSource {
 				// Move ID to the beginning of the array.
 				$id = $this->_descriptions[$table][$config->id[0]];
 				unset($this->_descriptions[$table][$config->id[0]]);
-				SledgeHammer\array_key_unshift($this->_descriptions[$table], $config->id[0], $id);
+				Sledgehammer\array_key_unshift($this->_descriptions[$table], $config->id[0], $id);
 			}
 		}
 		return parent::describe($model);
@@ -71,7 +75,7 @@ class RepositoryDataSource extends DataSource {
 	}
 
 	function create(Model $Model, $fields = null, $values = null) {
-		$repo = \SledgeHammer\getRepository($this->repository);
+		$repo = \Sledgehammer\getRepository($this->repository);
 		$instance = $repo->create($this->resolveModel($Model));
 		$this->importData($Model, array_combine($fields, $values), $instance);
 		$repo->save($this->resolveModel($Model), $instance);
@@ -98,12 +102,12 @@ class RepositoryDataSource extends DataSource {
 	 * @return \CakeModelWrapper
 	 */
 	function read(Model $Model, $queryData = array()) {
-		$repo = \SledgeHammer\getRepository($this->repository);
+		$repo = \Sledgehammer\getRepository($this->repository);
 		$result = $repo->all($this->resolveModel($Model));
 		$conditions = array();
 		if ($queryData['conditions'] !== null) {
 			foreach ($queryData['conditions'] as $column => $value) {
-				if (\SledgeHammer\text($column)->startsWith($Model->alias.'.')) {
+				if (\Sledgehammer\text($column)->startsWith($Model->alias.'.')) {
 					$column = substr($column, strlen($Model->alias) + 1); // Remove alias
 				}
 				$conditions[$column] = $value;
@@ -115,7 +119,7 @@ class RepositoryDataSource extends DataSource {
 		foreach (array_reverse($queryData['order']) as $order) {
 			if ($order) {
 				foreach ($order as $column => $direction) {
-					if (\SledgeHammer\text($column)->startsWith($Model->alias.'.')) {
+					if (\Sledgehammer\text($column)->startsWith($Model->alias.'.')) {
 						$column = substr($column, strlen($Model->alias) + 1); // Remove alias
 					}
 					if (strcasecmp($direction, 'asc') === 0) {
@@ -150,7 +154,7 @@ class RepositoryDataSource extends DataSource {
 	 * @return boolean
 	 */
 	function update(Model $Model, $fields = null, $values = null) {
-		$repo = \SledgeHammer\getRepository($this->repository);
+		$repo = \Sledgehammer\getRepository($this->repository);
 		$instance = $repo->get($this->resolveModel($Model), $Model->id);
 		$this->importData($Model, array_combine($fields, $values), $instance);
 		$repo->save($this->resolveModel($Model), $instance);
@@ -160,19 +164,19 @@ class RepositoryDataSource extends DataSource {
 	public function delete(Model $Model, $id = null) {
 		if (is_array($id)) {
 			foreach ($id as $column => $value) {
-				if (\SledgeHammer\text($column)->startsWith($Model->alias.'.')) {
+				if (\Sledgehammer\text($column)->startsWith($Model->alias.'.')) {
 					unset($id[$column]);
 					$id[substr($column, strlen($Model->alias) + 1)] = $value; // Remove alias
 				}
 			}
 		}
-		$repo = \SledgeHammer\getRepository($this->repository);
+		$repo = \Sledgehammer\getRepository($this->repository);
 		$repo->delete(get_class($Model), $id);
 		return true;
 	}
 
 	private function importData(Model $Model, $data, $instance) {
-		$repo = \SledgeHammer\getRepository($this->repository);
+		$repo = \Sledgehammer\getRepository($this->repository);
 		$config = RepositoryInspector::getModelConfig($repo, $this->resolveModel($Model));
 		foreach ($data as $field => $value) {
 			if (property_exists($instance, $field)) {

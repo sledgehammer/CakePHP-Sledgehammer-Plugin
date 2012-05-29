@@ -1,31 +1,31 @@
-# SledgeHammer as CakePHP 2.x plugin #
+# Sledgehammer as CakePHP 2.x plugin #
 
-Intergrates the SledgeHammer Framework into an CakePHP 2.x project
+Intergrates the Sledgehammer Framework into an CakePHP 2.x project
 
 ## Installation ##
 
 ### 1. Add the plugin  ###
 
-Place this plugin into the "app/Plugin/SledgeHammer/" folder.
-``` git submodule add git://github.com/bfanger/cakeplugin_sledgehammer.git app/Plugin/SledgeHammer ```
+Place this plugin into the "app/Plugin/Sledgehammer/" folder.
+``` git submodule add git://github.com/sledgehammer/CakePHP-Sledgehammer-Plugin.git app/Plugin/Sledgehammer ```
 
 
-### 2. Add SledgeHammer  ###
+### 2. Add Sledgehammer  ###
 Place the "sledgehammer" folder at the same level as the "app" folder:
-``` git submodule add git://github.com/bfanger/sledgehammer_core.git sledgehammer/core ```
+``` git submodule add git://github.com/sledgehammer/core.git sledgehammer/core ```
 
 Your project folder should look like this
 
- - APP/
-    - Plugin/
-       - SledgeHammer/
-          - Readme.md (this file)
-          - ...
+ - app/
+   - Plugin/
+     - Sledgehammer/
+       - Readme.md (this file)
        - ...
-    - ...
+     - ...
+  - ...
  - lib/
-    - Cake/
-    - ...
+   - Cake/
+     - ...
  - sledgehammer/
     - core/
     - ...
@@ -40,20 +40,20 @@ Modify your app/Config/bootstrap.php to include:
 echo define('ENVIRONMENT', 'development');
 // Override the e-mailaddres to whom the error-reports are sent in production mode.
 $_SERVER['SERVER_ADMIN'] = 'your@email.com';
-CakePlugin::load('SledgeHammer', array('bootstrap' => true));
+CakePlugin::load('Sledgehammer', array('bootstrap' => true));
 ```
 ### 4. Activate goodies ###
 
-#### SledgeHammer statusbar ####
+#### Sledgehammer statusbar ####
 
 Add the statusbar element just before the `</body>` tag.
 
 ```php
-<?php echo $this->element('statusbar', array(), array('plugin' => 'SledgeHammer')); ?>
+<?php echo $this->element('statusbar', array(), array('plugin' => 'Sledgehammer')); ?>
 ```
 
-#### SledgeHammer Database ####
+#### Sledgehammer Database ####
 
-Upgrade your datasource in `APP/Config/database.php` from `Database/Mysql` into `SledgeHammer.Database/SledgeHammerMysql`
+Upgrade your datasource in `APP/Config/database.php` from `Database/Mysql` into `Sledgehammer.Database/SledgehammerMysql`
 
 Default to UTF-8 encoding and reports sql warnings & notices.

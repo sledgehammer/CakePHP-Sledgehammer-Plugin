@@ -1,14 +1,19 @@
 <?php
 /**
  * RepositoryInspector
+ * @package SledgehammerPlugin
  */
-class RepositoryInspector extends \SledgeHammer\Repository {
+
+/**
+ * Allows the RepositoryDataSource to inspect the ModelConfig classes in a Repository.
+ */
+class RepositoryInspector extends \Sledgehammer\Repository {
 
 	/**
 	 *
-	 * @param \SledgeHammer\Repository $repository
+	 * @param \Sledgehammer\Repository $repository
 	 * @param string $model
-	 * @return \SledgeHammer\ModelConfig
+	 * @return \Sledgehammer\ModelConfig
 	 */
 	static function getModelConfig($repository, $model) {
 		return $repository->_getConfig($model);

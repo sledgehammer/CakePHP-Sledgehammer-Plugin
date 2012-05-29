@@ -13,6 +13,6 @@ if ($placeholder) {
 }
 ?>
 <div class="statusbar">
-	<?php SledgeHammer\statusbar(); ?>
+	<?php Sledgehammer\statusbar(); ?>
 	<a href="#" onclick="this.parentNode.style.display='none';<?php if ($placeholder) { echo "this.parentNode.parentNode.getElementsByClassName('statusbar-placeholder')[0].style.display='none';"; } ?>return false;" title="Hide statusbar" class="statusbar-close">&times;</a>
 </div>

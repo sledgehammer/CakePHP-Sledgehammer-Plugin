@@ -1,12 +1,17 @@
 <?php
-use SledgeHammer\Inflector;
-use SledgeHammer\Collection;
-use SledgeHammer\HasManyPlaceholder;
-use SledgeHammer\BelongsToPlaceholder;
 /**
- * CakeModelWrapper present a model instance as an array.
+ * CakeModelWrapper
+ * @package SledgehammerPlugin
  */
-class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Iterator {
+use Sledgehammer\Inflector;
+use Sledgehammer\Collection;
+use Sledgehammer\HasManyPlaceholder;
+use Sledgehammer\BelongsToPlaceholder;
+/**
+ * Adaptor for ORM objects to CakePHP output.
+ * Behaves like an array the FormHelper & scaffolding classes expect.
+ */
+class CakeModelWrapper extends Sledgehammer\Object implements ArrayAccess, Iterator {
 
 	/**
 	 * @var stdClass
@@ -27,7 +32,8 @@ class CakeModelWrapper extends SledgeHammer\Object implements ArrayAccess, Itera
 	private $_options;
 
 	/**
-	 * @param stdClass|Collection $data The instance of collection
+	 * The instance or collection
+	 * @param stdClass|Collection $data
 	 */
 	function __construct($data, $options = array()) {
 		if ($data instanceof Collection) {

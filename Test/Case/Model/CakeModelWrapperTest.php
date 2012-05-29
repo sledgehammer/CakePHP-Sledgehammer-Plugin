@@ -1,7 +1,11 @@
 <?php
-require(CAKE_CORE_INCLUDE_PATH.'/Cake/Test/Case/Model/models.php');
 /**
- * CakeModelWrapper  Test Case
+ * CakeModelWrapperTestCase
+ * @package SledgehammerPlugin
+ */
+require_once(CAKE_CORE_INCLUDE_PATH.'/Cake/Test/Case/Model/models.php');
+/**
+ * CakeModelWrapper  TestCase
  */
 class CakeModelWrapperTestCase extends CakeTestCase {
 
@@ -20,17 +24,17 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$filename = SledgeHammer\Framework::$autoLoader->getFilename('SledgeHammer\Repository');
+		$filename = Sledgehammer\Framework::$autoLoader->getFilename('Sledgehammer\Repository');
 		if ($filename === null) {
-			$this->markTestSkipped('SledgeHammer ORM module not installed');
+			$this->markTestSkipped('Sledgehammer ORM module not installed');
 		}
 
 		// Reset DB & Repository
-		SledgeHammer\Repository::$instances = array();
-		SledgeHammer\Database::$instances = array(
-			'test' => new SledgeHammer\Database('sqlite:/tmp/cakephp_test.sqlite'),
+		Sledgehammer\Repository::$instances = array();
+		Sledgehammer\Database::$instances = array(
+			'test' => new Sledgehammer\Database('sqlite:/tmp/cakephp_test.sqlite'),
 		);
-		$db = SledgeHammer\getDatabase('test');
+		$db = Sledgehammer\getDatabase('test');
 		$foreignKeys = $db->query('PRAGMA foreign_key_list(Homes)');
 		if (count($foreignKeys->fetchAll()) == 0) {
 			// Add missing foreign_key
@@ -49,11 +53,11 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 				$this->assertEquals($e->getMessage(), 'SQLSTATE[HY000]: General error: 17 database schema has changed');
 			}
 		}
-		$backend = new SledgeHammer\DatabaseRepositoryBackend('test');
+		$backend = new Sledgehammer\DatabaseRepositoryBackend('test');
 		$backend->configs['Home']->class = 'stdClass';
 		$backend->configs['Advertisement']->class = 'stdClass';
 		$backend->configs['AnotherArticle']->class = 'stdClass';
-		SledgeHammer\getRepository()->registerBackend($backend);
+		Sledgehammer\getRepository()->registerBackend($backend);
 
 		$this->Advertisement = ClassRegistry::init('Advertisement');
 		$this->Home = ClassRegistry::init('Home');
@@ -85,7 +89,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	}
 
 	function test_offset_exist_in_instance() {
-		$repo = SledgeHammer\getRepository();
+		$repo = Sledgehammer\getRepository();
 		$wrapped = new CakeModelWrapper($repo->getHome(1), array('model' => 'Home'));
 		$this->assertTrue($wrapped->offsetExists('Advertisement'));
 		$this->assertFalse($wrapped->offsetExists('BlaBla'));
@@ -106,7 +110,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 			'recursive' => $recursive
 		));
 
-		$repo = SledgeHammer\getRepository();
+		$repo = Sledgehammer\getRepository();
 		$instance = $repo->get($model->alias, $id);
 		$wrapped = new CakeModelWrapper($instance, array('model' => $model->alias));
 
@@ -127,7 +131,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 			'recursive' => $recursive
 		));
 
-		$repo = SledgeHammer\getRepository();
+		$repo = Sledgehammer\getRepository();
 		$collection = $repo->all($model->alias);
 		$wrapped = new CakeModelWrapper($collection, array('model' => $model->alias));
 
