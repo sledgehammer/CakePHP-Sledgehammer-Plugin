@@ -9,7 +9,7 @@ use Sledgehammer\Framework;
 if (defined('Sledgehammer\INITIALIZED')) {
 	return;
 }
-if (file_exists(ROOT.'/sledgehammer/core/init_framework.php') === false) {
+if (file_exists(ROOT.'/sledgehammer/core/bootstrap.php') === false) {
 	trigger_error('Sledgehammer Framework not found in "'.ROOT.'/sledgehammer/"', E_USER_WARNING);
 	return;
 }
@@ -25,7 +25,7 @@ if (function_exists('posix_getpwuid')) {
 	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/');
 
 }
-require_once(ROOT.'/sledgehammer/core/init_framework.php');
+require_once(ROOT.'/sledgehammer/core/bootstrap.php');
 if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
 	Framework::$autoLoader->standalone = false; // PHPUnit also uses an autoloadeder
 }
