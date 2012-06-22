@@ -60,13 +60,13 @@ class SledgehammerMysql extends Mysql {
 				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 			);
-			if (!empty($config['encoding'])) {
-				$flags[PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES ' . $config['encoding'];
-			}
 			if (empty($config['unix_socket'])) {
 				$dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']}";
 			} else {
 				$dsn = "mysql:unix_socket={$config['unix_socket']};dbname={$config['database']}";
+			}
+			if (!empty($config['encoding'])) {
+				$dsn .= ';charset='.$config['encoding'];
 			}
 			$this->_connection = new \Sledgehammer\Database(
 				$dsn,
