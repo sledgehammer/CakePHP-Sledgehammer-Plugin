@@ -36,13 +36,20 @@ Your project folder should look like this
 Modify your app/Config/bootstrap.php to include:
 
 ```php
-// define current environent of add "SetEnv APPLICATION_ENV development" to your httpd.conf or .htaccess
-echo define('ENVIRONMENT', 'development');
-// Override the e-mailaddres to whom the error-reports are sent in production mode.
+// define current environent in code or add "SetEnv APPLICATION_ENV development" to your httpd.conf or .htaccess
+define('ENVIRONMENT', 'development');
+// Override the e-mailaddres to whom the error-reports are sent in production mode or rely on the SERVER_ADMIN in httpd.conf/.htaccess
 $_SERVER['SERVER_ADMIN'] = 'your@email.com';
 CakePlugin::load('Sledgehammer', array('bootstrap' => true));
 ```
 ### 4. Activate goodies ###
+
+
+#### Sledgehammer Database ####
+
+Upgrade your datasource in `APP/Config/database.php` from `Database/Mysql` into `Sledgehammer.Database/SledgehammerMysql`
+
+Default to UTF-8 encoding and reports sql warnings & notices.
 
 #### Sledgehammer statusbar ####
 
@@ -51,9 +58,3 @@ Add the statusbar element just before the `</body>` tag.
 ```php
 <?php echo $this->element('statusbar', array(), array('plugin' => 'Sledgehammer')); ?>
 ```
-
-#### Sledgehammer Database ####
-
-Upgrade your datasource in `APP/Config/database.php` from `Database/Mysql` into `Sledgehammer.Database/SledgehammerMysql`
-
-Default to UTF-8 encoding and reports sql warnings & notices.

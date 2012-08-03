@@ -35,12 +35,26 @@ class SledgehammerMysql extends Mysql {
 
 	function __construct($config = null, $autoConnect = true) {
 		unset($this->configKeyName);
+		if (class_exists('DATABASE_CONFIG', false)) {
+			$dbConfigs = new DATABASE_CONFIG();
+			foreach ($dbConfigs as $link => $dbConfig) {
+				if ($config == $dbConfig) {
+					$config['identifier'] = $link;
+					break;
+				}
+			}
+		}
 		parent::__construct($config, $autoConnect);
 	}
 
 	function __set($property, $value) {
-		if ($property == 'configKeyName') {
-			 \Sledgehammer\Database::$instances[$value] = $this->_connection;
+        if ($property == 'configKeyName') {
+			if ($this->config['identifier'] !== $value) {
+				warning('The detected identifier "'.$this->config['identifier'].'" was incorrect and should have been "'.$value.'"', 'Identical database configurations?');
+				if (empty(\Sledgehammer\Database::$instances[$value])) {
+					\Sledgehammer\Database::$instances[$value] = $this->_connection;
+				}
+			}
 		}
 		$this->$property = $value;
 	}
@@ -68,12 +82,18 @@ class SledgehammerMysql extends Mysql {
 			if (!empty($config['encoding'])) {
 				$dsn .= ';charset='.$config['encoding'];
 			}
+			if (!empty($config['identifier'])) {
+				$flags['logIdentifier'] = ($config['identifier'] === 'default') ? 'Database' : 'Database[<b>'.$config['identifier'].'</b>]';
+			}
 			$this->_connection = new \Sledgehammer\Database(
 				$dsn,
 				$config['login'],
 				$config['password'],
 				$flags
 			);
+			if (file_exists(Sledgehammer\APPLICATION_DIR.'settings/database.ini') === false) { // CakePHP handles the database connections?
+				\Sledgehammer\Database::$instances[$config['identifier']] = $this->_connection;
+			}
 			$this->connected = true;
 		} catch (PDOException $e) {
 			throw new MissingConnectionException(array('class' => $e->getMessage()));

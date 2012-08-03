@@ -31,27 +31,40 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 
 		// Reset DB & Repository
 		Sledgehammer\Repository::$instances = array();
-		Sledgehammer\Database::$instances = array(
-			'test' => new Sledgehammer\Database('sqlite:/tmp/cakephp_test.sqlite'),
-		);
+		if (empty(Sledgehammer\Database::$instances['test'])) {
+			$this->markTestSkipped('Datasource "'.get_class(ConnectionManager::getDataSource('test')).'" doesn\'t use a Sledgehammer\Database connection');
+		}
 		$db = Sledgehammer\getDatabase('test');
-		$foreignKeys = $db->query('PRAGMA foreign_key_list(Homes)');
-		if (count($foreignKeys->fetchAll()) == 0) {
-			// Add missing foreign_key
-			$sql = $db->fetchValue("SELECT sql FROM sqlite_master WHERE type='table' AND tbl_name='homes'");
-			$db->query('ALTER TABLE homes RENAME TO homes_backup');
-			$createStatement = substr(trim($sql), 0, -1).",\n\t";
-			$createStatement .= "FOREIGN KEY (advertisement_id) REFERENCES advertisements (id),\n\t";
-			$createStatement .= "FOREIGN KEY (another_article_id) REFERENCES another_articles (id))";
-			$db->query($createStatement);
-			$db->query('INSERT INTO homes SELECT * FROM homes_backup');
-			$db->query('DROP TABLE homes_backup');
-			try {
-				ConnectionManager::getDataSource('test')->query('SELECT * FROM homes');
-				$this->fail('No "SQLSTATE[HY000]: General error: 17 database schema has changed" error?');
-			} catch (Exception $e) {
-				$this->assertEquals($e->getMessage(), 'SQLSTATE[HY000]: General error: 17 database schema has changed');
+		$driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+		if ($driver === 'sqlite') {
+			$foreignKeys = $db->query('PRAGMA foreign_key_list(Homes)');
+			if (count($foreignKeys->fetchAll()) == 0) {
+				// Add missing foreign_key
+				$sql = $db->fetchValue("SELECT sql FROM sqlite_master WHERE type='table' AND tbl_name='homes'");
+				$db->query('ALTER TABLE homes RENAME TO homes_backup');
+				$createStatement = substr(trim($sql), 0, -1).",\n\t";
+				$createStatement .= "FOREIGN KEY (advertisement_id) REFERENCES advertisements (id),\n\t";
+				$createStatement .= "FOREIGN KEY (another_article_id) REFERENCES another_articles (id))";
+				$db->query($createStatement);
+				$db->query('INSERT INTO homes SELECT * FROM homes_backup');
+				$db->query('DROP TABLE homes_backup');
+				try {
+					ConnectionManager::getDataSource('test')->query('SELECT * FROM homes');
+					$this->fail('No "SQLSTATE[HY000]: General error: 17 database schema has changed" error?');
+				} catch (Exception $e) {
+					$this->assertEquals($e->getMessage(), 'SQLSTATE[HY000]: General error: 17 database schema has changed');
+				}
 			}
+		} else {
+			// mysql?
+			$db->query('ALTER TABLE homes ADD CONSTRAINT home_belongsTo_advertisement FOREIGN KEY (advertisement_id) REFERENCES advertisements (id)');
+			$db->query('ALTER TABLE homes ADD CONSTRAINT home_belongsTo_another_article FOREIGN KEY (another_article_id) REFERENCES another_articles (id)');
+
+			$row = $db->fetchRow('SHOW CREATE TABLE homes');
+			if (strpos($row['Create Table'], 'FOREIGN KEY') === false) {
+				preg_match('/ENGINE=([^ ]*)/', $row['Create Table'], $matches);
+				$this->markTestSkipped('FOREIGN KEYs not supported with the  "'.$matches[1].'" engine.');
+			};
 		}
 		$backend = new Sledgehammer\DatabaseRepositoryBackend('test');
 		$backend->configs['Home']->class = 'stdClass';
