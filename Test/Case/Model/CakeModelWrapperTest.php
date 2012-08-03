@@ -59,17 +59,35 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 			// mysql?
 			$db->query('ALTER TABLE homes ADD CONSTRAINT home_belongsTo_advertisement FOREIGN KEY (advertisement_id) REFERENCES advertisements (id)');
 			$db->query('ALTER TABLE homes ADD CONSTRAINT home_belongsTo_another_article FOREIGN KEY (another_article_id) REFERENCES another_articles (id)');
-
-			$row = $db->fetchRow('SHOW CREATE TABLE homes');
-			if (strpos($row['Create Table'], 'FOREIGN KEY') === false) {
-				preg_match('/ENGINE=([^ ]*)/', $row['Create Table'], $matches);
-				$this->markTestSkipped('FOREIGN KEYs not supported with the  "'.$matches[1].'" engine.');
-			};
 		}
 		$backend = new Sledgehammer\DatabaseRepositoryBackend('test');
 		$backend->configs['Home']->class = 'stdClass';
 		$backend->configs['Advertisement']->class = 'stdClass';
 		$backend->configs['AnotherArticle']->class = 'stdClass';
+		if ($driver === 'mysql') {
+			$createStatement = $db->fetchRow('SHOW CREATE TABLE homes');
+			if (strpos($createStatement['Create Table'], 'FOREIGN KEY') === false) {
+				// FOREIGN KEYs not supported with the selected engine. MyISAM or MEMORY, setting manually...
+				$backend->configs['Home']->belongsTo['advertisement'] = array(
+					'model' => 'Advertisement',
+					'reference' => 'advertisement_id'
+				);
+				$backend->configs['Home']->belongsTo['another_article'] = array(
+					'model' => 'AnotherArticle',
+					'reference' => 'another_article_id'
+				);
+				unset($backend->configs['Home']->properties['advertisement_id']);
+				unset($backend->configs['Home']->properties['another_article_id']);
+				$backend->configs['Advertisement']->hasMany['Homes'] = array(
+					'model' => 'Home',
+					'reference' => 'advertisement_id'
+				);
+				$backend->configs['AnotherArticle']->hasMany['Homes'] = array(
+					'model' => 'Home',
+					'reference' => 'another_article_id'
+				);
+			};
+		}
 		Sledgehammer\getRepository()->registerBackend($backend);
 
 		$this->Advertisement = ClassRegistry::init('Advertisement');
@@ -161,7 +179,8 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	 */
 	public function tearDown() {
 		unset($this->Advertisement);
-
+		unset($this->Home);
+		ob_flush();
 		parent::tearDown();
 	}
 
