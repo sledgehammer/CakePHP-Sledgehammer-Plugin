@@ -94,10 +94,13 @@ function sledgehammer_plugin_handle_exception_callback($exception) {
 }
 Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
 
+
 if (isset($_SERVER['HTTP_DEBUGR'])) {
-	Configure::write('Dispatcher.filters', array_merge(
-		Configure::read('Dispatcher.filters'), array(
-		'Sledgehammer.DebugRDispatcher'
-	)));
+	$filters = Configure::read('Dispatcher.filters');
+	if (is_array($filters) == false) {
+		$filters = array();
+	}
+	$filters[] = 'Sledgehammer.DebugRDispatcher';
+	Configure::write('Dispatcher.filters', $filters);
 }
 ?>
