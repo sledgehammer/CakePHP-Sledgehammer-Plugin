@@ -93,4 +93,11 @@ function sledgehammer_plugin_handle_exception_callback($exception) {
 	ErrorHandler::handleException($exception); // Show the error page (with using CakePHP's Exception.renderer)
 }
 Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
+
+if (isset($_SERVER['HTTP_DEBUGR'])) {
+	Configure::write('Dispatcher.filters', array_merge(
+		Configure::read('Dispatcher.filters'), array(
+		'Sledgehammer.DebugRDispatcher'
+	)));
+}
 ?>
