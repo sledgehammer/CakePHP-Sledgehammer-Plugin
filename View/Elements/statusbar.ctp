@@ -14,7 +14,7 @@ if ($placeholder) {
 ?>
 <div class="statusbar" id="statusbar">
 	<a href="javascript:document.getElementById('statusbar').style.display='none';" class="statusbar-close">&times;</a>
-	<?php Sledgehammer\statusbar(); ?><span class="statusbar-divider">, <span id="statusbar-debugr" class="statusbar-tab"><a href="http://debugr.net/" target="_top">debugR</a></span>
+	<?php Sledgehammer\statusbar(); ?><span class="statusbar-divider">, </span><span id="statusbar-debugr" class="statusbar-tab"><a href="http://debugr.net/" target="_top">debugR</a></span>
 	<script type="text/javascript">
 	(function () {
 		var counter = 0;
@@ -23,7 +23,7 @@ if ($placeholder) {
 				counter++;
 				var statusbar = document.getElementById('statusbar-debugr');
 				if (counter === 1) {
-					statusbar.innerHTML= '<span>Ajax: <b id="statusbar-debugr-count"></b> requests<div id="statusbar-debugr-popout" class="statusbar-popout"></span></span>';
+					statusbar.innerHTML= '<span>Ajax: <b id="statusbar-debugr-count"></b> requests<div id="statusbar-debugr-popout" class="statusbar-popout"></div></span>';
 				}
 				document.getElementById('statusbar-debugr-count').innerHTML = counter;
 				var popout = document.getElementById('statusbar-debugr-popout');
