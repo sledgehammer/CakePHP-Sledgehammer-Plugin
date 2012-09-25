@@ -1,7 +1,14 @@
 <?php
+/**
+ * An element that renders the Sledgehammer statusbar.
+ *
+ * @param bool $placeholder  true:Render a placeholder <div> with the same height as the statusbar.
+ */
 $hideStatusbar = (Configure::read('debug') == 0);
 if (isset($_GET['debug'])) {
 	$hideStatusbar = !$_GET['debug'];
+} elseif (Sledgehammer\ENVIRONMENT !== 'development') {
+	$hideStatusbar = true; // Hide statusbar in staging and production environments.
 }
 if ($hideStatusbar) {
 	return;
