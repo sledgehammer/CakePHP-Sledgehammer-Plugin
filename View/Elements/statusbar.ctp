@@ -24,6 +24,10 @@ if ($placeholder) {
 	<?php Sledgehammer\statusbar(); ?><span class="statusbar-divider">, </span><span id="statusbar-debugr" class="statusbar-tab"><a href="http://debugr.net/" target="_blank">debugR</a></span>
 	<script type="text/javascript">
 	(function () {
+		if (!window.addEventListener) { // IE lt 9
+			return;
+		}
+
 		var counter = 0;
 		window.addEventListener('message', function (e) {
 			if (e.data.debugR && e.data.label === 'sledgehammer-statusbar') {
