@@ -1,0 +1,10 @@
+{
+	"name": "cakephp-plugin/sledgehammer",
+	"description": "CakePHP plugin: Use the Sledgehammer Framework as a library in a CakePHP 2.x project.",
+	"type": "cakephp-plugin",
+	"license": "CC-BY-SA-3.0",
+	"require": {
+			"sledgehammer/core": "*",
+			"composer/installers": "*"
+	}
+}
