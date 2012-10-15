@@ -5,27 +5,23 @@
  * @package SledgehammerPlugin
  */
 use Sledgehammer\Framework;
-
-if (defined('Sledgehammer\INITIALIZED')) {
-	return;
+if (!defined('Sledgehammer\INITIALIZED')) {
+	define('Sledgehammer\STARTED', TIME_START);
+	if (function_exists('posix_getpwuid')) {
+		$posix_user = posix_getpwuid(posix_geteuid());
+		define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
+	} else {
+		define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/');
+	}
+	include_once (APP.'/Vendor/autoload.php');
+	if (!defined('Sledgehammer\INITIALIZED')) {
+		throw new Exception('Sledgehammer not loaded');
+	}
 }
-if (file_exists(ROOT.'/sledgehammer/core/bootstrap.php') === false) {
-	trigger_error('Sledgehammer Framework not found in "'.ROOT.'/sledgehammer/"', E_USER_WARNING);
-	return;
-}
-define('Sledgehammer\MICROTIME_START', TIME_START);
 //define('Sledgehammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
 if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'test.php') { // A webrequest?
-	require_once(ROOT.'/sledgehammer/core/render_public_folders.php');
+	require_once(APP.'/Vendor/sledgehammer/core/render_public_folders.php');
 }
-if (function_exists('posix_getpwuid')) {
-	$posix_user = posix_getpwuid(posix_geteuid());
-	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
-} else {
-	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/');
-
-}
-require_once(ROOT.'/sledgehammer/core/bootstrap.php');
 if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
 	Framework::$autoLoader->standalone = false; // PHPUnit also uses an autoloadeder
 }

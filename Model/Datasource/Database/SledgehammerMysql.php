@@ -91,7 +91,7 @@ class SledgehammerMysql extends Mysql {
 				$config['password'],
 				$flags
 			);
-			if (file_exists(Sledgehammer\APPLICATION_DIR.'settings/database.ini') === false) { // CakePHP handles the database connections?
+			if (file_exists(Sledgehammer\APP_DIR.'database.ini') === false) { // CakePHP handles the database connections?
 				\Sledgehammer\Database::$instances[$config['identifier']] = $this->_connection;
 			}
 			$this->connected = true;
