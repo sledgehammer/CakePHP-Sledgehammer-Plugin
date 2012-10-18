@@ -1,12 +1,12 @@
 <?php
 /**
  * RepositoryDataSource
- * @package SledgehammerPlugin
  */
 App::uses('DataSource', 'Model/Datasource');
 App::uses('RepositoryInspector', 'Sledgehammer.Model/Datasource');
 /**
  * DataSource adapter to use Sledgehammer\s Repository as backend for AppModels
+ * @package SledgehammerPlugin
  */
 class RepositoryDataSource extends DataSource {
 

@@ -1,21 +1,19 @@
 <?php
 /**
  * SledgehammerMysql
- * @package SledgehammerPlugin
  */
 App::uses('DboSource', 'Model/Datasource');
 App::uses('Mysql', 'Model/Datasource/Database');
 /**
- * SledgehammerMysql
- *
  * A DboSource subclass that uses the Sledgehammer's (PDO) Database class.
  * Adds extra debugging information and allows Sledgehammer classes to reuse cake's DATABASE_CONFIG and connections.
  *
  * Caveat:
  *   $db = getDatabase('default');
- * won't work until cake accesses the datasource, use:
+ * won't work until cake accesses the datasource, to force a connection use:
  *   ConnectionManager::getDataSource('default');
- * To force a connection.
+ *
+ * @package SledgehammerPlugin
  */
 class SledgehammerMysql extends Mysql {
 
@@ -91,7 +89,7 @@ class SledgehammerMysql extends Mysql {
 				$config['password'],
 				$flags
 			);
-			if (file_exists(Sledgehammer\APPLICATION_DIR.'settings/database.ini') === false) { // CakePHP handles the database connections?
+			if (file_exists(Sledgehammer\APP_DIR.'database.ini') === false) { // CakePHP handles the database connections?
 				\Sledgehammer\Database::$instances[$config['identifier']] = $this->_connection;
 			}
 			$this->connected = true;

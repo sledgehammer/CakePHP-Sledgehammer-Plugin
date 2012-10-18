@@ -6,6 +6,8 @@ use Sledgehammer\DebugR;
 App::uses('DispatcherFilter', 'Routing');
 /**
  * DebugRDispatcher
+ *
+ * @package SledgehammerPlugin
  */
 class DebugRDispatcher extends DispatcherFilter {
 

@@ -1,37 +1,36 @@
 <?php
-
+/**
+ * bootstrap
+ */
+use Sledgehammer\Framework;
 /**
  * Initialize the Sledgehammer framework and configure Cake to use Sledgehammer\ErrorHandler
  * @package SledgehammerPlugin
  */
-use Sledgehammer\Framework;
-
-if (defined('Sledgehammer\INITIALIZED')) {
-	return;
+if (!defined('Sledgehammer\INITIALIZED')) {
+	define('Sledgehammer\STARTED', TIME_START);
+	if (function_exists('posix_getpwuid')) {
+		$posix_user = posix_getpwuid(posix_geteuid());
+		define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
+	} else {
+		define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/');
+	}
+	define('Sledgehammer\VENDOR_DIR', APP.'Vendor/');
+	include_once (Sledgehammer\VENDOR_DIR.'autoload.php');
+	if (!defined('Sledgehammer\INITIALIZED')) {
+		throw new Exception('Sledgehammer not loaded');
+	}
 }
-if (file_exists(ROOT.'/sledgehammer/core/bootstrap.php') === false) {
-	trigger_error('Sledgehammer Framework not found in "'.ROOT.'/sledgehammer/"', E_USER_WARNING);
-	return;
-}
-define('Sledgehammer\MICROTIME_START', TIME_START);
-//define('Sledgehammer\APPLICATION_DIR', \ROOT.\DS.\APP_DIR.\DS);
+//define('Sledgehammer\APP_DIR', APP);
 if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'test.php') { // A webrequest?
-	require_once(ROOT.'/sledgehammer/core/render_public_folders.php');
+	require_once(Sledgehammer\CORE_DIR.'render_public_folders.php');
 }
-if (function_exists('posix_getpwuid')) {
-	$posix_user = posix_getpwuid(posix_geteuid());
-	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/'.$posix_user['name'].'/');
-} else {
-	define('Sledgehammer\TMP_DIR', TMP.'sledgehammer/');
-
-}
-require_once(ROOT.'/sledgehammer/core/bootstrap.php');
-if ( $_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
-	Framework::$autoLoader->standalone = false; // PHPUnit also uses an autoloadeder
+if ($_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
+	Framework::$autoloader->standalone = false; // PHPUnit also uses an autoloadeder
 }
 //*
-// Don't show notices when a class is unknown to the AutoLoader (allow Cake to load the class)
-Framework::$autoLoader->standalone = false;
+// Don't show notices when a class is unknown to the AutoLoader (allow Cake to load or generate the class)
+Framework::$autoloader->standalone = false;
 App::uses('CakeModelWrapper', 'Sledgehammer.Model');
 /*/
 // Register CakePHP and Application classes to Sledgehammer's AutoLoader
@@ -92,8 +91,8 @@ function sledgehammer_plugin_handle_exception_callback($exception) {
 	report_exception($exception); // mail/backtrace etc
 	ErrorHandler::handleException($exception); // Show the error page (with using CakePHP's Exception.renderer)
 }
-Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
 
+Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
 
 if (isset($_SERVER['HTTP_DEBUGR'])) {
 	$filters = Configure::read('Dispatcher.filters');

@@ -1,7 +1,6 @@
 <?php
 /**
  * CakeModelWrapper
- * @package SledgehammerPlugin
  */
 use Sledgehammer\Inflector;
 use Sledgehammer\Collection;
@@ -10,6 +9,8 @@ use Sledgehammer\BelongsToPlaceholder;
 /**
  * Adaptor for ORM objects to CakePHP output.
  * Behaves like an array the FormHelper & scaffolding classes expect.
+ *
+ * @package SledgehammerPlugin
  */
 class CakeModelWrapper extends Sledgehammer\Object implements ArrayAccess, Iterator {
 

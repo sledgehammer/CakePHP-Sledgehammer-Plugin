@@ -1,11 +1,12 @@
 <?php
 /**
  * CakeModelWrapperTestCase
- * @package SledgehammerPlugin
  */
 require_once(CAKE_CORE_INCLUDE_PATH.'/Cake/Test/Case/Model/models.php');
 /**
- * CakeModelWrapper  TestCase
+ * TestCase for the CakeModelWrapper.
+ *
+ * @package SledgehammerPlugin
  */
 class CakeModelWrapperTestCase extends CakeTestCase {
 
