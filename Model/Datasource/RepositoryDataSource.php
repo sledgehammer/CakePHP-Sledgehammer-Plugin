@@ -29,15 +29,9 @@ class RepositoryDataSource extends DataSource {
 	function listSources($data = null) {
 		if ($data === null && $this->_sources === null) {
 			$repo = \Sledgehammer\getRepository($this->repository);
-			$dir = new DirectoryIterator(APP.'Model');
-			$data = array();
-			foreach ($dir as $entry) {
-				if ($entry->isFile()) {
-					$model = substr($entry->getFilename(), 0, -4);
-					if ($repo->isConfigured($model)) {
-						$data[] = Inflector::tableize($model);
-					}
-				}
+			$models = array_keys(RepositoryInspector::getModelConfig($repo));
+			foreach ($models as $model) {
+				$data[] = Inflector::tableize($model);
 			}
 		}
 		return parent::listSources($data);
@@ -48,7 +42,7 @@ class RepositoryDataSource extends DataSource {
 			$repo = \Sledgehammer\getRepository($this->repository);
 			$sources = $this->listSources();
 			foreach ($sources as $table) {
-				$config = RepositoryInspector::getModelConfig($repo, Sledgehammer\Inflector::modelize($table));
+				$config = RepositoryInspector::getModelConfig($repo, Sledgehammer\Inflector::modelize($table, array('singularizeLast' => true)));
 				foreach ($config->belongsTo as $property => $belongsTo) {
 					$this->_descriptions[$table][$property.'_id'] = array();
 				}
@@ -101,7 +95,7 @@ class RepositoryDataSource extends DataSource {
 	 * )
 	 * @return \CakeModelWrapper
 	 */
-	function read(Model $Model, $queryData = array()) {
+	function read(Model $Model, $queryData = array(), $recursive = NULL) {
 		$repo = \Sledgehammer\getRepository($this->repository);
 		$result = $repo->all($this->resolveModel($Model));
 		$conditions = array();
@@ -153,7 +147,7 @@ class RepositoryDataSource extends DataSource {
 	 * @param array $values
 	 * @return boolean
 	 */
-	function update(Model $Model, $fields = null, $values = null) {
+	function update(Model $Model, $fields = null, $values = null, $conditions = null) {
 		$repo = \Sledgehammer\getRepository($this->repository);
 		$instance = $repo->get($this->resolveModel($Model), $Model->id);
 		$this->importData($Model, array_combine($fields, $values), $instance);
@@ -198,7 +192,7 @@ class RepositoryDataSource extends DataSource {
 	}
 
 	private function resolveModel(Model $Model) {
-		return get_class($Model);
+		return (Sledgehammer\Inflector::modelize($Model->table, array('singularizeLast' => true)));
 	}
 
 }

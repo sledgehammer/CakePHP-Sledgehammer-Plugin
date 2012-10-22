@@ -27,8 +27,7 @@ class CakeModelWrapper extends Sledgehammer\Object implements ArrayAccess, Itera
 	/**
 	 * @var array array(
 	 *   'model' => string,
-	 *	 'resursive' => int Default: 1
-	 *
+	 *	 'recursive' => int Default: 1
 	 */
 	private $_options;
 

@@ -13,9 +13,12 @@ class RepositoryInspector extends Repository {
 	 *
 	 * @param \Sledgehammer\Repository $repository
 	 * @param string $model
-	 * @return \Sledgehammer\ModelConfig
+	 * @return \Sledgehammer\ModelConfig|array
 	 */
-	static function getModelConfig($repository, $model) {
+	static function getModelConfig($repository, $model = null) {
+		if ($model === null) {
+			return $repository->configs;
+		}
 		return $repository->_getConfig($model);
 	}
 }
