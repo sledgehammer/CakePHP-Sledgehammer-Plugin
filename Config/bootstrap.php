@@ -28,6 +28,13 @@ if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'t
 if ($_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
 	Framework::$autoloader->standalone = false; // PHPUnit also uses an autoloadeder
 }
+// Create CakePHP tmp folders
+\Sledgehammer\mkdirs(TMP.'cache/models');
+\Sledgehammer\mkdirs(TMP.'cache/persistent');
+\Sledgehammer\mkdirs(TMP.'cache/views');
+\Sledgehammer\mkdirs(TMP.'logs');
+\Sledgehammer\mkdirs(TMP.'sessions');
+\Sledgehammer\mkdirs(TMP.'tests');
 //*
 // Don't show notices when a class is unknown to the AutoLoader (allow Cake to load or generate the class)
 Framework::$autoloader->standalone = false;
