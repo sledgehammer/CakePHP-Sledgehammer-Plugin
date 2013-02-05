@@ -25,7 +25,7 @@ class CakeModelWrapperTestCase extends CakeTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$filename = Sledgehammer\Framework::$autoLoader->getFilename('Sledgehammer\Repository');
+		$filename = Sledgehammer\Framework::$autoloader->getFilename('Sledgehammer\Repository');
 		if ($filename === null) {
 			$this->markTestSkipped('Sledgehammer ORM module not installed');
 		}

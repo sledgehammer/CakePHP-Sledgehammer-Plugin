@@ -82,25 +82,30 @@ Framework::$autoLoader->importFolder(APP, array(
 Configure::write('Error.handler', array(Sledgehammer\Framework::$errorHandler, 'errorCallback'));
 Configure::write('Error.level', Sledgehammer\E_MAX);
 
-/**
- * An Exception handler callback that reports the exception to SledgeHander before it lets Cake handle the exception.
- *
- * @param Exception $exception
- */
-function sledgehammer_plugin_handle_exception_callback($exception) {
-	if (headers_sent() === false) {
-		$code = $exception->getCode();
-		if ($code < 400 || $code >= 506) {
-			$code = 500;
+if (Configure::read('Exception.handler') !== 'ErrorHandler::handleException') { // Is a custom "Exception.handler" configured?
+	restore_exception_handler(); // Unregister Sledgehammer's exception handler.
+} else {
+	// Overwrite the default Exception.handler
+
+	/**
+	 * An Exception handler callback that reports the exception to SledgeHander before it lets Cake handle the exception.
+	 *
+	 * @param Exception $exception
+	 */
+	function sledgehammer_plugin_handle_exception_callback($exception) {
+		if (headers_sent() === false) {
+			$code = $exception->getCode();
+			if ($code < 400 || $code >= 506) {
+				$code = 500;
+			}
+			header($_SERVER['SERVER_PROTOCOL'].' '.$code);
 		}
-		header($_SERVER['SERVER_PROTOCOL'].' '.$code);
+		report_exception($exception); // mail/backtrace etc
+		ErrorHandler::handleException($exception); // Show the error page (with using CakePHP's Exception.renderer)
 	}
-	report_exception($exception); // mail/backtrace etc
-	ErrorHandler::handleException($exception); // Show the error page (with using CakePHP's Exception.renderer)
+
+	Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
 }
-
-Configure::write('Exception.handler', 'sledgehammer_plugin_handle_exception_callback');
-
 if (isset($_SERVER['HTTP_DEBUGR'])) {
 	$filters = Configure::read('Dispatcher.filters');
 	if (is_array($filters) == false) {
