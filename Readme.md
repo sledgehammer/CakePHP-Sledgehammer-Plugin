@@ -17,22 +17,23 @@ Place this plugin into the "app/Plugin/Sledgehammer/" folder.
 
 
 #### Add Sledgehammer  ####
-Place the "sledgehammer" folder at the same level as the "app" folder:
-``` git submodule add git://github.com/sledgehammer/core.git Vendor/sledgehammer/core ```
+Place the "sledgehammer" folder in the "app/Vendor/" folder:
+``` git submodule add git://github.com/sledgehammer/core.git app/Vendor/sledgehammer/core ```
 
 Your project folder should look like this:
 
  - app/
+   - composer.json 
    - Plugin/
      - Sledgehammer/
        - Readme.md (this file)
        - ...
+   - Vendor/
+     - sledgehammer/
+       - core/
  - lib/
    - Cake/
- - Vendor/
-   - sledgehammer/
-     - core/
-
+ 
 
 ## 2. Activate plugin ##
 
