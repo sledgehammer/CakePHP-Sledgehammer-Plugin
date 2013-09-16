@@ -15,7 +15,7 @@ class DebugRDispatcher extends DispatcherFilter {
 
 	/**
 	 * Send DebugR-sledgehammer-statusbar header when the extension is active.
-	 * @param type $event
+	 * @param CakeEvent $event
 	 */
 	 public function afterDispatch(CakeEvent $event) {
 		 if (DebugR::isEnabled() && headers_sent() === false) {

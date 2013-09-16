@@ -20,7 +20,7 @@ if ($placeholder) {
 }
 ?>
 <div class="statusbar" id="statusbar">
-	<a href="javascript:document.getElementById('statusbar').style.display='none';" class="statusbar-close">&times;</a>
+	<a onclick="document.getElementById('statusbar').style.display='none';" class="statusbar-close">&times;</a>
 	<?php Sledgehammer\statusbar(); ?><span class="statusbar-divider">, </span><span id="statusbar-debugr" class="statusbar-tab"><a href="http://debugr.net/" target="_blank">debugR</a></span>
 	<script type="text/javascript">
 	(function () {

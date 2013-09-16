@@ -26,7 +26,7 @@ if (isset($_SERVER['REQUEST_URI']) && $_SERVER['SCRIPT_FILENAME'] != WWW_ROOT.'t
 	require_once(Sledgehammer\CORE_DIR.'render_public_folders.php');
 }
 if ($_SERVER['SCRIPT_FILENAME'] == WWW_ROOT.'test.php') {
-	Framework::$autoloader->standalone = false; // PHPUnit also uses an autoloadeder
+	Framework::$autoloader->standalone = false; // PHPUnit also uses an autoloader
 }
 
 // Create CakePHP tmp folders
